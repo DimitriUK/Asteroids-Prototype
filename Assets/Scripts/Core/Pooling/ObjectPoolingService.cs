@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Core.Gameplay;
+using System.Collections.Generic;
 using UnityEngine;
 
-namespace Core.Utils
+namespace Core.Pooling
 {
     public class ObjectPoolingService : MonoBehaviour
     {
@@ -9,42 +10,10 @@ namespace Core.Utils
         public List<ProjectileData> pools;
         public Dictionary<ProjectileData, Queue<GameObject>> PoolDictionary;
 
-        public void Initialize()
+        public void Initialise()
         {
             InitializeRequirements();
             InitializePool();
-        }
-
-        private void InitializeRequirements()
-        {
-            Game = GetComponent<GameService>();
-        }
-
-        private void InitializePool()
-        {
-            PoolDictionary = new Dictionary<ProjectileData, Queue<GameObject>>();
-
-            foreach (ProjectileData pool in pools)
-            {
-                Queue<GameObject> objectPool = new Queue<GameObject>();
-
-                for (int i = 0; i < pool.size; i++)
-                {
-                    GameObject objToSpawn = Instantiate(pool.prefab);
-                    objToSpawn.SetActive(false);
-                    objectPool.Enqueue(objToSpawn);
-                }
-
-                PoolDictionary.Add(pool, objectPool);
-            }
-        }
-
-        public Queue<GameObject> GetProjectilesFromPool(ProjectileData tag)
-        {
-            if (!PoolDictionary.ContainsKey(tag))
-                return null;
-
-            return PoolDictionary[tag];          
         }
 
         public GameObject SpawnProjectileFromPool(ProjectileData tag, Vector3 position, Quaternion rotation)
@@ -70,11 +39,51 @@ namespace Core.Utils
             return projectileToSpawn;
         }
 
-        public void DespawnProjectilesFromPool()
+        public void DespawnAsteroidsFromPool()
         {
             foreach (var asteroid in PoolDictionary[pools[0]])
             {
                 asteroid.SetActive(false);
+            }
+        }
+
+        public void DespawnBulletsFromPool()
+        {
+            foreach (var bullet in PoolDictionary[pools[1]])
+            {
+                bullet.SetActive(false);
+            }
+        }
+
+        public void GetAsteroidsFromPoolAndSpawn(int asteroidsToSpawn)
+        {
+            for (int i = 0; i < asteroidsToSpawn; i++)
+            {
+                SpawnProjectileFromPool(pools[0], transform.position, Quaternion.identity);
+            }
+        }
+
+        private void InitializeRequirements()
+        {
+            Game = GetComponent<GameService>();
+        }
+
+        private void InitializePool()
+        {
+            PoolDictionary = new Dictionary<ProjectileData, Queue<GameObject>>();
+
+            foreach (ProjectileData pool in pools)
+            {
+                Queue<GameObject> objectPool = new Queue<GameObject>();
+
+                for (int i = 0; i < pool.size; i++)
+                {
+                    GameObject objToSpawn = Instantiate(pool.prefab);
+                    objToSpawn.SetActive(false);
+                    objectPool.Enqueue(objToSpawn);
+                }
+
+                PoolDictionary.Add(pool, objectPool);
             }
         }
     }
