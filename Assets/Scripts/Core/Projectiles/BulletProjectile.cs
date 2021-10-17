@@ -5,10 +5,10 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class BulletProjectile : MonoBehaviour, IDamageable, IPooledProjectile
 {
-    [SerializeField] private Rigidbody rigidbody;
+    [SerializeField] private Rigidbody bulletRigidbody;
 
-    [SerializeField] private float desiredSpeed;
-    [SerializeField] private float maxSpeed;
+    [SerializeField] private float desiredSpeed = 0;
+    [SerializeField] private float maxSpeed = 0;
 
     private void Awake()
     {
@@ -17,7 +17,7 @@ public class BulletProjectile : MonoBehaviour, IDamageable, IPooledProjectile
 
     private void InitializeProjectile()
     {
-        rigidbody = GetComponent<Rigidbody>();
+        bulletRigidbody = GetComponent<Rigidbody>();
     }
 
     void OnEnable()
@@ -48,8 +48,8 @@ public class BulletProjectile : MonoBehaviour, IDamageable, IPooledProjectile
     private void FixedUpdate()
     {
 
-        rigidbody.velocity = Vector3.ClampMagnitude(rigidbody.velocity, maxSpeed);
-        rigidbody.AddRelativeForce(Vector3.forward * desiredSpeed, ForceMode.Impulse);
+        bulletRigidbody.velocity = Vector3.ClampMagnitude(bulletRigidbody.velocity, maxSpeed);
+        bulletRigidbody.AddRelativeForce(Vector3.forward * desiredSpeed, ForceMode.Impulse);
     }
 
     private void OnTriggerEnter(Collider other)
@@ -71,7 +71,7 @@ public class BulletProjectile : MonoBehaviour, IDamageable, IPooledProjectile
 
     public void OnProjectileSpawn()
     {
-        rigidbody.velocity = Vector3.zero;
-        rigidbody.angularVelocity = Vector3.zero;
+        bulletRigidbody.velocity = Vector3.zero;
+        bulletRigidbody.angularVelocity = Vector3.zero;
     }
 }
