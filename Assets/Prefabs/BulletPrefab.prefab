@@ -12,11 +12,9 @@ GameObject:
   - component: {fileID: 8158393125326363044}
   - component: {fileID: 8158393125326363045}
   - component: {fileID: 8158393125326363046}
-  - component: {fileID: 5802067079758095673}
   - component: {fileID: 4747811546207251071}
   - component: {fileID: 8158393125326363047}
   - component: {fileID: 355553452050237493}
-  - component: {fileID: 5343100986321801350}
   m_Layer: 9
   m_Name: BulletPrefab
   m_TagString: Untagged
@@ -98,102 +96,6 @@ SphereCollider:
   serializedVersion: 2
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
---- !u!82 &5802067079758095673
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8158393125326363040}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
-  m_Volume: 0.2
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!54 &4747811546207251071
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -222,7 +124,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bb49f48a54824d4191296f3f0cd492e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidbody: {fileID: 0}
+  bulletRigidbody: {fileID: 0}
   desiredSpeed: 5
   maxSpeed: 5
 --- !u!114 &355553452050237493
@@ -237,24 +139,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62cf42d9108911d4780ba0c5e0580159, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &5343100986321801350
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8158393125326363040}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6312036bf7995d647922f28ba25eb28d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  SoundData: {fileID: 11400000, guid: d9df8800348a3a741bfafb0f0045b8b4, type: 2}
-  SoundsToPlay:
-  - {fileID: 8300000, guid: a1baf27b3c03dfd4081ca46ca0048ce4, type: 3}
-  - {fileID: 8300000, guid: 7929d58135c9bb140a65af878e1bd810, type: 3}
-  - {fileID: 8300000, guid: 9a60d623be5915644a1f5aaedd301657, type: 3}
-  - {fileID: 8300000, guid: f175aef063a22c043a1d7438d4ae2ccb, type: 3}
-  - {fileID: 8300000, guid: 0043c40759a8ed94899515604139e010, type: 3}
-  - {fileID: 8300000, guid: bdae2e0845b9c2948b379962085b039b, type: 3}
-  isPlayingOnEnable: 1

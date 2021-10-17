@@ -177,8 +177,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ac1335a7090ecd458d6285e6b77dc3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canSpawn: 0
-  PlayerSkins:
+  CanSpawn: 0
+  playerGun: {fileID: 0}
+  playerSkins:
   - {fileID: 7623178436635888026}
   - {fileID: 7623178436635888024}
   - {fileID: 7623178436635888030}
@@ -194,7 +195,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a72c9f307ce7a8d43aaae03612fc1fb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlayerGunBarrel: {fileID: 1219774133649607704}
+  CanFire: 0
+  nextShot: 0
+  fireRate: 0.1
+  playerGunBarrel: {fileID: 1219774133649607704}
 --- !u!114 &7312121306729984283
 MonoBehaviour:
   m_ObjectHideFlags: 0
