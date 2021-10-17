@@ -9,6 +9,12 @@ namespace Core.Utils
 
         private const int OUT_OF_BOUNDS_LEFT_SIDE_X_OFFSET = 10;
 
+        public Vector3 GetScreenPosition()
+        {
+            var screenPosition = mainCam.WorldToScreenPoint(transform.position);
+            return screenPosition;
+        }
+
         private void Awake()
         {
             Initialize();
@@ -40,24 +46,18 @@ namespace Core.Utils
         {
             Vector3 screenPosition = GetScreenPosition();
 
-            bool isOutOfBoundsOnLeftOfScreen = screenPosition.x < 0 ? true : false;
-            bool isOutOfBoundsOnRightOfScreen = screenPosition.x > Screen.width ? true : false;
-            bool isOutOfBoundsOnTopOfScreen = screenPosition.y < 0 ? true : false;
-            bool isOutOfBoundsOnBottomOfScreen = screenPosition.y > Screen.height ? true : false;
+            var isOutOfBoundsOnLeftOfScreen = screenPosition.x < 0 ? true : false;
+            var isOutOfBoundsOnRightOfScreen = screenPosition.x > Screen.width ? true : false;
+            var isOutOfBoundsOnTopOfScreen = screenPosition.y < 0 ? true : false;
+            var isOutOfBoundsOnBottomOfScreen = screenPosition.y > Screen.height ? true : false;
 
             if (isOutOfBoundsOnLeftOfScreen) TeleportToRightOfScreen(screenPosition);
             if (isOutOfBoundsOnRightOfScreen) TeleportToLeftOfScreen(screenPosition);
             if (isOutOfBoundsOnTopOfScreen) TeleportToTopofScreeen(screenPosition);
             if (isOutOfBoundsOnBottomOfScreen) TeleportToBottomOfScreen(screenPosition);
-        }
+        }      
 
-        public Vector3 GetScreenPosition()
-        {
-            var screenPosition = mainCam.WorldToScreenPoint(transform.position);
-            return screenPosition;
-        }
-
-        void TeleportToLeftOfScreen(Vector3 screenPosition)
+        private void TeleportToLeftOfScreen(Vector3 screenPosition)
         {
             Vector3 targetScreenPosition = new Vector3(0, screenPosition.y, screenPosition.z);
             Vector3 targetWorldPosition = mainCam.ScreenToWorldPoint(targetScreenPosition);
@@ -65,7 +65,7 @@ namespace Core.Utils
             MoveObjectToTargetPosition(targetWorldPosition);
         }
 
-        void TeleportToRightOfScreen(Vector3 screenPosition)
+        private void TeleportToRightOfScreen(Vector3 screenPosition)
         {
             Vector3 targetScreenPosition = new Vector3(Screen.width - OUT_OF_BOUNDS_LEFT_SIDE_X_OFFSET, screenPosition.y, screenPosition.z);
             Vector3 targetWorldPosition = mainCam.ScreenToWorldPoint(targetScreenPosition);
@@ -73,7 +73,7 @@ namespace Core.Utils
             MoveObjectToTargetPosition(targetWorldPosition);
         }
 
-        void TeleportToTopofScreeen(Vector3 screenPosition)
+        private void TeleportToTopofScreeen(Vector3 screenPosition)
         {
             Vector3 targetScreenPosition = new Vector3(screenPosition.x, Screen.height, screenPosition.z);
             Vector3 targetWorldPosition = mainCam.ScreenToWorldPoint(targetScreenPosition);
@@ -81,7 +81,7 @@ namespace Core.Utils
             MoveObjectToTargetPosition(targetWorldPosition);
         }
 
-        void TeleportToBottomOfScreen(Vector3 screenPosition)
+        private void TeleportToBottomOfScreen(Vector3 screenPosition)
         {
             Vector3 targetScreenPosition = new Vector3(screenPosition.x, Screen.height - Screen.height, screenPosition.z);
             Vector3 targetWorldPosition = mainCam.ScreenToWorldPoint(targetScreenPosition);
