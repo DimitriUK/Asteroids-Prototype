@@ -11,9 +11,7 @@ namespace Core.Gameplay
         [HideInInspector] public GameRoundsService GameRoundsService;
         [HideInInspector] public GameScore GameScore;
         [HideInInspector] public GameUI GameUI;
-
-        [HideInInspector] public AudioService AudioService;
-     
+        [HideInInspector] public AudioService AudioService;     
         [HideInInspector] public ObjectPoolingService ObjectPoolingService;
         [HideInInspector] public InputService InputService;
 
