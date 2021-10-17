@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f4a34db507f284418edc9ce01c4e312, type: 3}
+  m_Name: 8 Bit Retro - Music
+  m_EditorClassIdentifier: 
+  ClipsToPlay:
+  - {fileID: 8300000, guid: e6ebd0e3d94bfd64bb8bc7873f49a0da, type: 3}
+  - {fileID: 8300000, guid: 803e5b30269251c40ab75d6aedd1cb51, type: 3}
