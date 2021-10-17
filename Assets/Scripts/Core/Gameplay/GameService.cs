@@ -1,211 +1,187 @@
-﻿using UnityEngine;
+﻿using Core.Audio;
+using Core.Controls;
 using Core.Utils;
+using UnityEngine;
 
-public enum GameRounds
+namespace Core.Gameplay
 {
-    One = 5,
-    Two = 7,
-    Three = 9,
-    Four = 12,
-    Five = 15
-}
-
-public class GameService : MonoBehaviour
-{
-    [Header("Dependencies")]
-    [HideInInspector] public GameScore GameScore;
-    [HideInInspector] public GameMusic GameMusic;
-    [HideInInspector] public GameUI GameUI;
-    [HideInInspector] public ObjectPoolingService ObjectPoolingService;
-    private Player player;
-
-    [Header("Spawnable Player Prefab")]
-    [SerializeField] private GameObject PlayerPrefab;
-
-    public GameRounds CurrentLevel;
-
-    private int PlayerLivesLeft;
-    private int PlayerTargetScore;
-
-    private int AsteroidsCurrentAmount;
-
-    private bool isGameActive;
-
-    private void Awake()
+    public class GameService : MonoBehaviour
     {
-        InitializeGame();
-    }
+        [Header("Dependencies")]
+        [HideInInspector] public GameRoundsService GameRoundsService;
+        [HideInInspector] public GameScore GameScore;
+        [HideInInspector] public GameUI GameUI;
 
-    private void InitializeGame()
-    {
-        InitializeDependencies();
-        InitializeStartingConditions();
-        InitializePoolService();
-    }
+        [HideInInspector] public AudioService AudioService;
+     
+        [HideInInspector] public ObjectPoolingService ObjectPoolingService;
+        [HideInInspector] public InputService InputService;
 
-    private void InitializeDependencies()
-    {
-        GameScore = GetComponent<GameScore>();
-        GameMusic = FindObjectOfType<GameMusic>();
-        GameUI = GetComponent<GameUI>();
-        ObjectPoolingService = GetComponent<ObjectPoolingService>();
-    }
+        public int GetCurrentAsteroidsInRound => asteroidsCurrentAmount;
+        public int GetPlayerLivesLeftInRound => playerLivesLeft;
 
-    private void InitializeStartingConditions()
-    {
-        CurrentLevel = GameRounds.One;
+        [Header("Spawnable Player Prefab")]
+        [SerializeField] private GameObject PlayerPrefab = null;
 
-        PlayerLivesLeft = GameConstants.PLAYER_LIVES_DEFAULT;
-        PlayerTargetScore = (int)CurrentLevel * GameConstants.TOTAL_ASTEROIDS_PER_GROUP;
-    }
+        private Player player;
 
-    private void InitializePlayer()
-    {
-        player = Instantiate(PlayerPrefab).GetComponent<Player>();
-    }
+        private bool isGameActive;
 
-    private void InitializePoolService()
-    {
-        ObjectPoolingService.Initialize();
-    }
+        private int playerLivesLeft;
+        private int playerTargetScore;
+        private int asteroidsCurrentAmount = 0;
 
-    private void OnEnable()
-    {
-        Actions.OnAsteroidDestroyed += DestroyTargetObjectiveCounter;
-        Actions.OnLiveLost += RemovePlayerLive;
-    }
-    private void OnDisable()
-    {
-        Actions.OnAsteroidDestroyed -= DestroyTargetObjectiveCounter;
-        Actions.OnLiveLost -= RemovePlayerLive;
-    }
-
-    private void Update()
-    {
-        if (isGameActive)
-            return;
-
-        if (Input.GetKeyDown(KeyCode.Space))
+        public void StartNewGame()
         {
-            SetupPoolForNewGame();
-            StartGameWithConditions();
-        }
-    }
+            if (isGameActive)
+                return;
 
-    private void SetupPoolForNewGame()
-    {
-        ObjectPoolingService.DespawnProjectilesFromPool();
-    }
-
-    private void StartGameWithConditions()
-    {
-        InitializeStartingConditions();
-        InitializePlayer();
-        TogglePlayer(true, true);
-        StartRound((int)CurrentLevel);
-        SetupGameUIForNewGame();
-        SetupScoreForNewGame();
-        SetupAudioForNewGame();
-    }
-
-    public void StartRound(int asteroidsToSpawn)
-    {
-        for (int i = 0; i < asteroidsToSpawn; i++)
-        {
-            ObjectPoolingService.SpawnProjectileFromPool(ObjectPoolingService.pools[0], transform.position, Quaternion.identity);
-        }
-        SetGameActiveAndPlayerCanSpawn();
-    }
-    private void SetupGameUIForNewGame()
-    {
-        GameUI.ResetLivesUI();
-        GameUI.SetStartGameScreen(false);
-        GameUI.SetGameOverScreen(false);
-    }
-
-    private void SetupScoreForNewGame()
-    {
-        GameScore.TotalScore = 0;
-        GameUI.SetScoreTextToCurrentScore(GameScore.TotalScore);
-        GameUI.SetFinalScoreTextToCurrentScore(GameScore.TotalScore);
-    }
-
-    private void SetupAudioForNewGame()
-    {
-        GameMusic.SetupMusicTimeSubtractor(PlayerTargetScore);
-        GameMusic.ResetMusic();
-        GameMusic.StartMusicForNewGame();
-    }
-
-    private void SetGameActiveAndPlayerCanSpawn()
-    {
-        isGameActive = true;
-        player.canSpawn = true;
-    }
-
-    public void DestroyTargetObjectiveCounter(AsteroidProjectile asteroidReference)
-    {
-        PlayerTargetScore--;
-
-        if (PlayerTargetScore == 0)
-            SetupNewRoundConditions();
-    }
-    private void RemovePlayerLive()
-    {
-        PlayerLivesLeft--;
-
-        if (PlayerLivesLeft == 0)
-            SetupGameOver();
-    }
-
-    private void SetupNewRoundConditions()
-    {
-        CurrentLevel = CurrentLevel.Next();
-        PlayerTargetScore = (int)CurrentLevel * GameConstants.TOTAL_ASTEROIDS_PER_GROUP;
-        SetupNextRound(CurrentLevel);
-        SetupAudioForNewGame();
-        SetupNextRoundMusic();
-    }
-    private void SetupNextRoundMusic()
-    {
-        SetupAudioForNewGame();
-    }
-
-    public void SetupNextRound(GameRounds nextRound)
-    {
-        StartRound((int)nextRound);
-    }
-
-    private void SetupGameOver()
-    {
-        isGameActive = false;
-
-        Debug.Log("GAME OVER");
-
-        TogglePlayer(false, false);
-        GameUI.SetGameOverScreen(true);
-        GameUI.SetStartGameScreen(true);
-        GameUI.SetFinalScoreTextToCurrentScore(GameScore.TotalScore);
-        GameMusic.StopMusic();
-
-        ObjectPoolingService.DespawnProjectilesFromPool();
-    }
-
-    private void TogglePlayer(bool isPlayerActive, bool isGameStarted)
-    {
-        if (!isGameStarted)
-        {
-            player.canSpawn = false;
-            Debug.Log("GAME OVER, REMOVE PLAYER");
-            return;
-        }
-        else
-        {
-            player.canSpawn = true;
+            StartGameWithNewGameConditions();
         }
 
-        if (isPlayerActive)
-            player.ActivatePlayer();
-        else player.DeactivatePlayer();
+        private void Awake()
+        {
+            InitialiseGame();
+        }
+
+        private void InitialiseGame()
+        {
+            InitialiseDependencies();
+            InitialiseStartingConditions();
+            InitialisePoolService();
+        }
+
+        private void InitialiseDependencies()
+        {
+            InputService = GetComponent<InputService>();
+            GameRoundsService = GetComponent<GameRoundsService>();
+            GameScore = GetComponent<GameScore>();
+            AudioService = FindObjectOfType<AudioService>();
+            GameUI = GetComponent<GameUI>();
+            ObjectPoolingService = GetComponent<ObjectPoolingService>();
+        }
+
+        private void InitialiseStartingConditions()
+        {
+            GameRoundsService.SetRoundToNewGame();
+            playerLivesLeft = GameConstants.PLAYER_LIVES_DEFAULT;
+            playerTargetScore = (int)GameRoundsService.GetCurrentRound() * GameConstants.TOTAL_ASTEROIDS_PER_GROUP;
+        }
+
+        private void InitialisePlayer()
+        {
+            if (player == null)
+            {
+                player = Instantiate(PlayerPrefab).GetComponent<Player>();
+                InputService.InitialisePlayer();
+            }
+        }
+
+        private void InitialisePoolService()
+        {
+            ObjectPoolingService.Initialise();
+        }
+
+        private void OnEnable()
+        {
+            Actions.OnAsteroidDestroyed += DestroyTargetObjectiveCounter;
+            Actions.OnLiveLost += RemovePlayerLive;
+        }
+        private void OnDisable()
+        {
+            Actions.OnAsteroidDestroyed -= DestroyTargetObjectiveCounter;
+            Actions.OnLiveLost -= RemovePlayerLive;
+        }      
+
+        private void StartGameWithNewGameConditions()
+        {
+            InitialiseStartingConditions();
+            InitialisePlayer();
+            SetGameActiveAndPlayerCanSpawn();
+            TogglePlayer(true, true);
+            GameRoundsService.SetupRoundAndStartRound((int)GameRoundsService.GetCurrentRound());
+            SetupScoreAndUIForNewGame();
+            SetupAudioForNewGame();
+            player.ActivateRespawnShield();
+        }
+
+        private void SetupScoreAndUIForNewGame()
+        {
+            GameScore.ResetTotalScoreToDefault();
+            GameUI.SetupTextUIForNewGame();
+        }
+
+        private void SetupAudioForNewGame()
+        {
+            AudioService.music.SetupMusicTimeDelay(playerTargetScore);
+            AudioService.music.StopMusic();
+            AudioService.StartMusic();
+        }
+
+        private void SetGameActiveAndPlayerCanSpawn()
+        {
+            isGameActive = true;
+            player.CanSpawn = true;
+        }
+
+        public void DestroyTargetObjectiveCounter(Asteroids.AsteroidSize asteroidSize)
+        {
+            playerTargetScore--;
+
+            if (playerTargetScore == 0)
+                SetupNextRoundConditions();
+        }
+        private void RemovePlayerLive()
+        {
+            playerLivesLeft--;
+
+            if (playerLivesLeft == 0)
+                SetupGameOver();
+        }
+
+        private void SetupNextRoundConditions()
+        {
+            ObjectPoolingService.DespawnAsteroidsFromPool();
+            ObjectPoolingService.DespawnBulletsFromPool();
+
+            GameRoundsService.GameRounds nextRound = GameRoundsService.GetNextRound();
+            GameRoundsService.CurrentLevel = nextRound;
+
+            playerTargetScore = (int)nextRound * GameConstants.TOTAL_ASTEROIDS_PER_GROUP;
+            GameRoundsService.SetupRoundAndStartRound((int)nextRound);
+
+            player.ActivateRespawnShield();
+
+            SetupAudioForNewGame();
+        }
+
+        private void SetupGameOver()
+        {
+            isGameActive = false;
+            TogglePlayer(false, false);
+            GameUI.SetGameOverScreen(true);
+            GameUI.SetStartGameScreen(true);
+            GameUI.SetFinalScoreTextToCurrentScore(GameScore.TotalScore);
+            AudioService.music.StopMusic();
+            ObjectPoolingService.DespawnAsteroidsFromPool();
+            ObjectPoolingService.DespawnBulletsFromPool();
+        }
+
+        private void TogglePlayer(bool isPlayerActive, bool isGameStarted)
+        {
+            if (!isGameStarted)
+            {
+                player.CanSpawn = false;
+                return;
+            }
+            else
+            {
+                player.CanSpawn = true;
+            }
+
+            if (isPlayerActive)
+                player.ActivatePlayer();
+            else player.DeactivatePlayer();
+        }
     }
 }
