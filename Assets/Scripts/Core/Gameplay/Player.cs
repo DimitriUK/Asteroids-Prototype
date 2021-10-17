@@ -1,136 +1,188 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+namespace Core.Gameplay
 {
-    public bool canSpawn;
-
-    private PlayerInput playerInput;
-    private BoxCollider playerCollider;
-    private Vector3 GetPlayerDefaultSpawnPos => Vector3.zero;
-
-    [SerializeField] private MeshRenderer[] PlayerSkins;
-
-    WaitForSeconds playerRespawnTime = new WaitForSeconds(0.5f);
-    WaitForSeconds playerProtectionBlinkTime = new WaitForSeconds(0.25f);
-
-    private void Awake()
+    public class Player : MonoBehaviour
     {
-        playerCollider = GetComponent<BoxCollider>();
-        playerInput = GetComponent<PlayerInput>();
+        public bool CanSpawn;
+        public bool IsControllable { get; set; }
 
-        InitializePlayerConditions();
-    }
+        [HideInInspector] public Gun playerGun;
 
-    private void InitializePlayerConditions()
-    {
-        DisablePlayerPhysics();
-        StartCoroutine(SetupPlayerConditionsTimer());
-    }
+        [SerializeField] private MeshRenderer[] playerSkins = null;
 
-    private IEnumerator SetupPlayerConditionsTimer()
-    {
-        yield return playerRespawnTime;
+        private BoxCollider playerCollider;
+        private Rigidbody rigidBody;
 
-        if (!canSpawn)
-            yield break;
+        private WaitForSeconds playerRespawnTime = new WaitForSeconds(0.5f);
+        private WaitForSeconds playerProtectionBlinkTime = new WaitForSeconds(0.25f);
+        private Vector3 getPlayerDefaultSpawnPosition => Vector3.zero;
 
-        ActivatePlayer();
-        SetupRespawnProtectionTimer();
-    }
+        private int spawnProtectionCounter = 0;
 
-    int spawnProtectionCounter = 0;
-    private const int SPAWN_PROTECTION_COUNTER_TARGET = 5;
+        private const float MAX_ENGINE_SPEED = 10;
+        private const float MAX_TORQUE_SPEED = 20;
 
-    private void ResetSpawnProtectionCounter()
-    {
-        spawnProtectionCounter = 0;
-    }
-    private void SetupRespawnProtectionTimer()
-    {
-        StartCoroutine(StartRespawnProtectionTimer());
-    }
+        private const int SPAWN_PROTECTION_COUNTER_TARGET = 5;
 
-    private IEnumerator StartRespawnProtectionTimer()
-    {
-        spawnProtectionCounter++;
-
-        SetPlayerSkin(false);
-
-        yield return playerProtectionBlinkTime;
-
-        SetPlayerSkin(true);
-
-        yield return playerProtectionBlinkTime;
-
-        if (spawnProtectionCounter == SPAWN_PROTECTION_COUNTER_TARGET)
+        public void SetupPlayerFirstTime()
         {
-            EnablePlayerPhysics();
-            yield break;
+            DisableControls();
+            DisablePlayerPhysics();
+            SetPlayerSkin(false);
         }
 
-        StartCoroutine(StartRespawnProtectionTimer());
-    }
-
-    public void ActivatePlayer()
-    {
-        ResetSpawnProtectionCounter();
-        ToggleControls(true);
-        RespawnPlayer();
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.tag == "Asteroid")
+        public void EnableControls()
         {
-            ActivateDeath();
+            IsControllable = true;
+        }
+
+        public void DisableControls()
+        {
+            IsControllable = false;
+        }
+
+        public void ActivatePlayer()
+        {
+            ResetSpawnProtectionCounter();
+            ToggleControls(true);
+            RespawnPlayer();
+        }
+
+        public void DeactivatePlayer()
+        {
+            ToggleControls(false);
+            DisablePlayerPhysics();
+            LoseLive();
+            SetPlayerSkin(false);
+            InitializePlayerConditions();
+        }
+
+        public void ActivateRespawnShield()
+        {
+            playerGun.DisableGun();
+            ResetSpawnProtectionCounter();
+            SetupRespawnProtection();
+        }
+
+        public void MoveandTurnShip(float verticalAxisValue, float horizontalAxisValue)
+        {
+            if (!IsControllable)
+                return;
+
+            MoveShip(verticalAxisValue); TurnShip(horizontalAxisValue);
+        }
+
+        private void Awake()
+        {
+            playerGun = GetComponent<Gun>();
+            playerCollider = GetComponent<BoxCollider>();
+            rigidBody = GetComponent<Rigidbody>();
+            InitializePlayerConditions();
+        }
+
+        private void InitializePlayerConditions()
+        {
+            DisablePlayerPhysics();
+            StartCoroutine(SetupPlayerConditionsTimer());
+        }
+
+        private void SetupRespawnProtection()
+        {
+            DisablePlayerPhysics();
+            StartCoroutine(StartRespawnProtectionTimer());
+        }
+
+        private IEnumerator SetupPlayerConditionsTimer()
+        {
+            yield return playerRespawnTime;
+
+            if (!CanSpawn)
+                yield break;
+
+            ActivatePlayer();
+            ActivateRespawnShield();
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.tag == "Asteroid")
+            {
+                DeactivatePlayer();
+            }
+        }
+
+        private void ToggleControls(bool isControlsOn)
+        {
+            if (isControlsOn)
+                EnableControls();
+            else DisableControls();
+        }
+
+        private void EnablePlayerPhysics()
+        {
+            playerCollider.enabled = true;
+        }
+
+        private void DisablePlayerPhysics()
+        {
+            playerCollider.enabled = false;
+        }
+
+        private void SetPlayerSkin(bool isSkinOn)
+        {
+            for (int i = 0; i < playerSkins.Length; i++)
+            {
+                playerSkins[i].enabled = isSkinOn;
+            }
+        }
+
+        private void LoseLive()
+        {
+            Actions.OnLiveLost?.Invoke();
+        }
+
+        private void RespawnPlayer()
+        {
+            transform.position = getPlayerDefaultSpawnPosition;
+        }
+
+        private void MoveShip(float verticalAxisValue)
+        {
+            rigidBody.AddForce(transform.forward * MAX_ENGINE_SPEED * verticalAxisValue);
+        }
+
+        private void TurnShip(float horizontalAxisValue)
+        {
+            rigidBody.AddTorque(transform.up * MAX_TORQUE_SPEED * horizontalAxisValue);
+        }
+
+        private void ResetSpawnProtectionCounter()
+        {
+            spawnProtectionCounter = 0;
+        }
+
+        private IEnumerator StartRespawnProtectionTimer()
+        {
+            spawnProtectionCounter++;
+
+            SetPlayerSkin(false);
+
+            yield return playerProtectionBlinkTime;
+
+            SetPlayerSkin(true);
+
+            yield return playerProtectionBlinkTime;
+
+            if (spawnProtectionCounter == SPAWN_PROTECTION_COUNTER_TARGET)
+            {
+                EnablePlayerPhysics();
+                playerGun.EnableGun();
+                yield break;
+            }
+
+            StartCoroutine(StartRespawnProtectionTimer());
         }
     }
-
-    private void ActivateDeath()
-    {
-        DeactivatePlayer();
-    }
-
-    public void DeactivatePlayer()
-    {
-        ToggleControls(false);
-        DisablePlayerPhysics();
-        LoseLive();
-        SetPlayerSkin(false);
-        InitializePlayerConditions();
-    }
-    private void ToggleControls(bool isControlsOn)
-    {
-        if (isControlsOn)
-            playerInput.EnableControls();
-        else playerInput.DisableControls();
-    }
-
-    private void EnablePlayerPhysics()
-    {
-        playerCollider.enabled = true;
-    }
-
-    private void DisablePlayerPhysics()
-    {
-        playerCollider.enabled = false;
-    }
-
-    private void SetPlayerSkin(bool isSkinOn)
-    {
-        for (int i = 0; i < PlayerSkins.Length; i++)
-        {
-            PlayerSkins[i].enabled = isSkinOn;
-        }
-    }
-    private void LoseLive()
-    {
-        Actions.OnLiveLost?.Invoke();
-    }
-
-    private void RespawnPlayer()
-    {
-        transform.position = GetPlayerDefaultSpawnPos;
-    }     
 }
