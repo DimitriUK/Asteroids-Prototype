@@ -33,7 +33,7 @@ namespace Core.Gameplay {
 
         public GameRounds GetNextRound()
         {
-            return CurrentLevel.Next();
+            return CurrentLevel.GetNextValue();
         }
 
         public void SetupRoundAndStartRound(int asteroidsToSpawn)
