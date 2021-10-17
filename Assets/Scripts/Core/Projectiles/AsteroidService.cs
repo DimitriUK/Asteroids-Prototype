@@ -6,7 +6,6 @@ namespace Core.Gameplay
     public class AsteroidService : MonoBehaviour, IPooledProjectile
     {
         public Asteroids[] Asteroids;
-        public Action OnLocalAsteroidDestroyed;
 
         public void OnProjectileSpawn()
         {
