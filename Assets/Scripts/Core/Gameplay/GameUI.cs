@@ -1,90 +1,121 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class GameUI : MonoBehaviour
+namespace Core.Gameplay
 {
-    [SerializeField] private GameObject[] PlayerLivesImages;
-
-    [SerializeField] private Text PlayerScore;
-    [SerializeField] private Text PlayerFinalScore;
-
-    [Header("UI Text Popups")]
-    [SerializeField] private Text PressStartScreen;
-    [SerializeField] private Text GameOverScreen;
-
-    private void Awake()
+    public class GameUI : MonoBehaviour
     {
-        InitializeUIScreens();
-    }
+        private GameService gameService;
 
-    private void OnEnable()
-    {
-        Actions.OnLiveLost += RemoveLiveCounterUI;
-    }
-    private void OnDisable()
-    {
-        Actions.OnLiveLost -= RemoveLiveCounterUI;
-    }
+        [SerializeField] private GameObject[] PlayerLivesImages = null;
 
-    public void ResetLivesUI()
-    {
-        for (int i = 0; i < PlayerLivesImages.Length; i++)
+        [Header("UI Text Score")]
+        [SerializeField] private Text PlayerScore = null;
+        [SerializeField] private Text PlayerFinalScore = null;
+
+        [Header("UI Text Popups")]
+        [SerializeField] private Text PressStartScreen = null;
+        [SerializeField] private Text GameOverScreen = null;
+
+        public void SetupUIForNewGame()
         {
-            PlayerLivesImages[i].SetActive(true);
+            ResetLivesUI();
+            SetStartGameScreen(false);
+            SetGameOverScreen(false);
         }
-    }
 
-    private void RemoveLiveCounterUI()
-    {
-        for (int i = PlayerLivesImages.Length - 1; i > -1; i--)
+        public void SetStartGameScreen(bool isActive)
         {
-            if (PlayerLivesImages[i].activeSelf)
+            if (isActive)
             {
-                PlayerLivesImages[i].SetActive(false);
-                break;
+                PressStartScreen.CrossFadeAlpha(1, 0.5f, true);
+            }
+            else
+            {
+                PressStartScreen.CrossFadeAlpha(0, 0.1f, true);
             }
         }
-    }
 
-    private void InitializeUIScreens()
-    {
-        PressStartScreen.gameObject.SetActive(true);
-        GameOverScreen.gameObject.SetActive(true);
-
-        PressStartScreen.CrossFadeAlpha(1, 1, true);
-        GameOverScreen.CrossFadeAlpha(0, 1, true);
-    }
-
-    public void SetStartGameScreen(bool isActive)
-    {
-        if (isActive)
+        public void SetGameOverScreen(bool isActive)
         {
-            PressStartScreen.CrossFadeAlpha(1, 0.5f, true);
+            if (isActive)
+            {
+                GameOverScreen.CrossFadeAlpha(1, 0.5f, true);
+            }
+            else
+            {
+                GameOverScreen.CrossFadeAlpha(0, 0.1f, true);
+            }
         }
-        else
-        {
-            PressStartScreen.CrossFadeAlpha(0, 0.1f, true);
-        }
-    }
 
-    public void SetGameOverScreen(bool isActive)
-    {
-        if (isActive)
+        public void SetScoreTextToCurrentScore(int currentScore)
         {
-            GameOverScreen.CrossFadeAlpha(1, 0.5f, true);
+            PlayerScore.text = currentScore.ToString();
         }
-        else
-        {
-            GameOverScreen.CrossFadeAlpha(0, 0.1f, true);
-        }
-    }
 
-    public void SetScoreTextToCurrentScore(int currentScore)
-    {
-        PlayerScore.text = currentScore.ToString();
-    }
-    public void SetFinalScoreTextToCurrentScore(int currentScore)
-    {
-        PlayerFinalScore.text = currentScore.ToString();
+        public void SetFinalScoreTextToCurrentScore(int currentScore)
+        {
+            PlayerFinalScore.text = currentScore.ToString();
+        }
+
+        public void SetupTextUIForNewGame()
+        {
+            SetScoreTextToCurrentScore(gameService.GameScore.TotalScore);
+            SetFinalScoreTextToCurrentScore(gameService.GameScore.TotalScore);
+
+            SetStartGameScreen(false);
+            SetGameOverScreen(false);
+
+            ResetLivesUI();
+        }
+
+        private void ResetLivesUI()
+        {
+            for (int i = 0; i < PlayerLivesImages.Length; i++)
+            {
+                PlayerLivesImages[i].SetActive(true);
+            }
+        }
+
+        private void Awake()
+        {
+            InitializeDependencies();
+            InitializeUIScreens();
+        }
+
+        private void OnEnable()
+        {
+            Actions.OnLiveLost += RemoveLiveCounterUI;
+        }
+        private void OnDisable()
+        {
+            Actions.OnLiveLost -= RemoveLiveCounterUI;
+        }
+
+        private void RemoveLiveCounterUI()
+        {
+            for (int i = PlayerLivesImages.Length - 1; i > -1; i--)
+            {
+                if (PlayerLivesImages[i].activeSelf)
+                {
+                    PlayerLivesImages[i].SetActive(false);
+                    break;
+                }
+            }
+        }
+
+        private void InitializeDependencies()
+        {
+            gameService = GetComponent<GameService>();
+        }
+
+        private void InitializeUIScreens()
+        {
+            PressStartScreen.gameObject.SetActive(true);
+            GameOverScreen.gameObject.SetActive(true);
+
+            PressStartScreen.CrossFadeAlpha(1, 1, true);
+            GameOverScreen.CrossFadeAlpha(0, 1, true);
+        }
     }
 }
