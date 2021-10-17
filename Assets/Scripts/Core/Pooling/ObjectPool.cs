@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-
-[System.Serializable]
-public struct ObjectPool
+﻿namespace Core.Pooling
 {
-    public ProjectileData scriptable;
+    [System.Serializable]
+    public struct ObjectPool
+    {
+        public ProjectileData scriptable;
+    }
 }
-
 
