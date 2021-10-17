@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Core.Gameplay;
+using UnityEngine;
 
 namespace Core.Audio
 {

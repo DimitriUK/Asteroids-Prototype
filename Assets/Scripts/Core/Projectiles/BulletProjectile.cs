@@ -1,77 +1,79 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
-public class BulletProjectile : MonoBehaviour, IDamageable, IPooledProjectile
+namespace Core.Gameplay
 {
-    [SerializeField] private Rigidbody bulletRigidbody;
-
-    [SerializeField] private float desiredSpeed = 0;
-    [SerializeField] private float maxSpeed = 0;
-
-    private void Awake()
+    [RequireComponent(typeof(Rigidbody))]
+    public class BulletProjectile : MonoBehaviour, IDamageable, IPooledProjectile
     {
-        InitializeProjectile();
-    }
+        [SerializeField] private Rigidbody bulletRigidbody;
 
-    private void InitializeProjectile()
-    {
-        bulletRigidbody = GetComponent<Rigidbody>();
-    }
+        [SerializeField] private float desiredSpeed = 0;
+        [SerializeField] private float maxSpeed = 0;
 
-    void OnEnable()
-    {
-        StartDespawnTimer();
-    }
-
-    void StartDespawnTimer()
-    {
-        StartCoroutine(DespawnTimer());
-    }
-    public void DespawnProjectile()
-    {
-        gameObject.SetActive(false);
-    }
-
-    WaitForSeconds despawnTime = new WaitForSeconds(2);
-
-    private IEnumerator DespawnTimer()
-    {
-        while (true)
+        private void Awake()
         {
-            yield return despawnTime;
-            DespawnProjectile();
+            InitializeProjectile();
         }
-    }
 
-    private void FixedUpdate()
-    {
+        private void InitializeProjectile()
+        {
+            bulletRigidbody = GetComponent<Rigidbody>();
+        }
 
-        bulletRigidbody.velocity = Vector3.ClampMagnitude(bulletRigidbody.velocity, maxSpeed);
-        bulletRigidbody.AddRelativeForce(Vector3.forward * desiredSpeed, ForceMode.Impulse);
-    }
+        void OnEnable()
+        {
+            StartDespawnTimer();
+        }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        IDamageable damageable = other.GetComponent<IDamageable>();
+        void StartDespawnTimer()
+        {
+            StartCoroutine(DespawnTimer());
+        }
+        public void DespawnProjectile()
+        {
+            gameObject.SetActive(false);
+        }
 
-        if (damageable == null)
-            return;
+        WaitForSeconds despawnTime = new WaitForSeconds(2);
 
-        damageable.OnHit();
+        private IEnumerator DespawnTimer()
+        {
+            while (true)
+            {
+                yield return despawnTime;
+                DespawnProjectile();
+            }
+        }
 
-        OnHit();
-    }
+        private void FixedUpdate()
+        {
 
-    public void OnHit()
-    {
-        gameObject.SetActive(false);
-    }
+            bulletRigidbody.velocity = Vector3.ClampMagnitude(bulletRigidbody.velocity, maxSpeed);
+            bulletRigidbody.AddRelativeForce(Vector3.forward * desiredSpeed, ForceMode.Impulse);
+        }
 
-    public void OnProjectileSpawn()
-    {
-        bulletRigidbody.velocity = Vector3.zero;
-        bulletRigidbody.angularVelocity = Vector3.zero;
+        private void OnTriggerEnter(Collider other)
+        {
+            IDamageable damageable = other.GetComponent<IDamageable>();
+
+            if (damageable == null)
+                return;
+
+            damageable.OnHit();
+
+            OnHit();
+        }
+
+        public void OnHit()
+        {
+            gameObject.SetActive(false);
+        }
+
+        public void OnProjectileSpawn()
+        {
+            bulletRigidbody.velocity = Vector3.zero;
+            bulletRigidbody.angularVelocity = Vector3.zero;
+        }
     }
 }
